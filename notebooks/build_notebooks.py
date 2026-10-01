@@ -31,23 +31,25 @@ def code(src):
 
 GET_CODE = '''
 # --- Get the code into /kaggle/working/pygpt ---------------------------------
-# Option A: public GitHub repo (set REPO_URL). Option B: a Kaggle Dataset named
-# "pygpt-code" containing the repo folder (upload the zip -> Datasets -> New Dataset).
-REPO_URL = ""            # e.g. "https://github.com/<you>/pygpt.git"
+# Primary: clone the public repo (always current). Fallback: the "pygpt-code"
+# Kaggle Dataset (works with Internet off / if GitHub is unreachable).
+REPO_URL = "https://github.com/Rehan123-bash/pygpt.git"
 import os, shutil, subprocess
 os.chdir("/kaggle/working")
 if os.path.exists("pygpt"):
     shutil.rmtree("pygpt")
 if REPO_URL:
-    subprocess.run(["git", "clone", "--depth", "1", REPO_URL, "pygpt"], check=True)
-else:
+    try:
+        subprocess.run(["git", "clone", "--depth", "1", REPO_URL, "pygpt"], check=True)
+    except Exception as e:
+        print("clone failed, falling back to the pygpt-code dataset:", e)
+if not os.path.exists("pygpt/model.py"):
     src = "/kaggle/input/pygpt-code"
-    cand = [os.path.join(src, "pygpt"), src]
-    for c in cand:
+    for c in (os.path.join(src, "pygpt"), src):
         if os.path.exists(os.path.join(c, "model.py")):
             shutil.copytree(c, "pygpt"); break
     else:
-        raise SystemExit("set REPO_URL or add the 'pygpt-code' dataset as input")
+        raise SystemExit("no code: clone failed and no 'pygpt-code' dataset input")
 print(sorted(os.listdir("pygpt")))
 '''
 
