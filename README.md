@@ -47,4 +47,7 @@ torchrun --standalone --nproc_per_node=2 train.py --config config/gpt2_small_py.
     --data_dir=/kaggle/input/pygpt-python-tokens --ckpt_dir=/kaggle/working --time_limit_hours=10
 ```
 
+No browser needed: with an API token in `~/.kaggle/kaggle.json`, `python kaggle/push_day1.py`
+uploads the code as a Kaggle dataset and pushes/runs/monitors all three notebooks (see its docstring).
+
 Any config value can be overridden with `--key=value`.

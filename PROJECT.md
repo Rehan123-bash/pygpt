@@ -293,6 +293,8 @@ pygpt/
 │   ├── 01_prepare_data.ipynb  ← Kaggle CPU notebook
 │   ├── 02_train.ipynb         ← Kaggle GPU notebook: MODE = sanity / bench / main / resume
 │   └── 03_eval_and_demo.ipynb ← eval → export → HF Space bundle / upload
+├── kaggle/
+│   └── push_day1.py           ← drive the dataset + notebook runs via the Kaggle API (no browser)
 ├── results/
 │   ├── log.csv · loss_curve.png · metrics.json · samples.md
 ├── slides/

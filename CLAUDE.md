@@ -35,6 +35,8 @@ relevance of algorithms/techniques; design ↔ implementation sync. PROJECT.md �
 - `notebooks/build_notebooks.py` → `01_prepare_data.ipynb` (CPU), `02_train.ipynb` (T4×2, `MODE`
   switch), `03_eval_and_demo.ipynb` (eval → export → Space bundle zip → optional HF upload)
 - `slides/slides_outline.md` — all 13 slides drafted; ⟨…⟩ marks numbers to fill from real run
+- `kaggle/push_day1.py` — run the whole Kaggle workflow from the CLI (code-dataset · nb01 · nb02
+  --mode sanity/bench/main · nb03 · status/log/watch/quota). Needs `~/.kaggle/kaggle.json`.
 - To do: real Kaggle runs (Day 1), fill slides with real numbers + make PPTX, VS Code ext (stretch)
 
 ## Commands

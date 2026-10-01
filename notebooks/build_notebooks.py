@@ -118,7 +118,6 @@ import torch; print("torch", torch.__version__, "| GPUs:", torch.cuda.device_cou
     code('''
 # ================= SET THESE =================
 MODE = "sanity"                 # "sanity" | "bench" | "main" | "resume"
-DATA_DIR = "/kaggle/input/pygpt-python-tokens"
 N_GPUS = torch.cuda.device_count()
 MICRO_BATCH = 16                # lower to 12 or 8 if bench shows OOM / > 15 GB peak
 GRAD_ACCUM = 8
@@ -128,6 +127,14 @@ MAX_ITERS = 3800
 RESUME_PATH = ""                # e.g. "/kaggle/input/02-train/ckpt_latest.pt"
 COMPILE = False
 # =============================================
+# data can arrive as the dataset "pygpt-python-tokens" or as Notebook 01's mounted output
+import glob
+DATA_DIR = "/kaggle/input/pygpt-python-tokens"
+if MODE != "sanity" and not os.path.exists(DATA_DIR + "/train.bin"):
+    hits = glob.glob("/kaggle/input/*/train.bin")
+    assert hits, "add the pygpt-python-tokens dataset or Notebook 01's output as an input"
+    DATA_DIR = os.path.dirname(hits[0])
+print("DATA_DIR =", DATA_DIR)
 TOK_PER_STEP = MICRO_BATCH * 512 * N_GPUS * GRAD_ACCUM
 print(f"tokens/step = {TOK_PER_STEP:,}; {MAX_ITERS} steps = {MAX_ITERS*TOK_PER_STEP/1e6:.0f}M tokens")
 os.chdir("/kaggle/working/pygpt")
@@ -215,6 +222,10 @@ Steps: `eval.py` (metrics + plots + samples, with the GPT-2 baseline) → `expor
     code('''
 import glob, os
 DATA_DIR = "/kaggle/input/pygpt-python-tokens"
+if not os.path.exists(DATA_DIR + "/val.bin"):
+    hits = glob.glob("/kaggle/input/*/val.bin")
+    assert hits, "add the pygpt-python-tokens dataset or Notebook 01's output as an input"
+    DATA_DIR = os.path.dirname(hits[0])
 # find ckpt_best.pt from the Notebook 02 input (falls back to ckpt_latest.pt)
 cands = sorted(glob.glob("/kaggle/input/*/ckpt_best.pt")) or sorted(glob.glob("/kaggle/input/*/ckpt_latest.pt"))
 assert cands, "add Notebook 02's latest version as an input (Add Input -> Your Work)"

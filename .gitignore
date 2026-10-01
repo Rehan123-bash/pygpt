@@ -9,3 +9,4 @@ data/tiny/
 *.safetensors
 .ipynb_checkpoints/
 results/*.png
+build/
