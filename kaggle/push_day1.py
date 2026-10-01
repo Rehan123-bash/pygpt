@@ -55,9 +55,13 @@ def run(args, **kw):
 
 def username():
     path = os.path.expanduser("~/.kaggle/kaggle.json")
-    if not os.path.exists(path):
-        sys.exit("missing ~/.kaggle/kaggle.json - kaggle.com -> Settings -> API -> Create New Token")
-    return json.load(open(path))["username"]
+    if os.path.exists(path):
+        return json.load(open(path))["username"]
+    r = subprocess.run([kaggle_cli(), "config", "view"], text=True, capture_output=True)
+    m = re.search(r"username:\s*(\S+)", r.stdout)
+    if m:
+        return m.group(1)
+    sys.exit("no Kaggle credentials: run `kaggle auth login` or save ~/.kaggle/kaggle.json")
 
 
 def code_dataset(user):

@@ -10,3 +10,4 @@ data/tiny/
 .ipynb_checkpoints/
 results/*.png
 build/
+kaggle/kernel-metadata.json
