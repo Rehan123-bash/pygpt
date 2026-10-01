@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+runs/
+data/synthetic/
+data/pygpt-python-tokens/
+data/tiny/
+*.bin
+*.pt
+*.safetensors
+.ipynb_checkpoints/
+results/*.png
