@@ -55,19 +55,25 @@ python app/app.py                                           # Gradio demo on :78
 python notebooks/build_notebooks.py                         # regenerate .ipynb after editing them
 ```
 
-## Verified so far (Day 0, CPU only)
-sanity 6/6 · smoke run loss 10.4→4.1 · kill + `--resume` continues step/log/tokens · 2-process
-`torchrun` (gloo) · time-limit exit saves ckpt · `prepare_data.py` logic against a faked stream ·
-real codeparrot tokenizer downloaded: vocab 32768, **eos id 0** (ignore transformers' "eos_token_id
-… got 50256" warning — stale Hub metadata, harmless) · **real HF streaming works**: `prepare_data.py`
-pulled 2.1M train + 0.25M val tokens from both codeparrot-clean datasets into `data/tiny/`, decoded
-sample is genuine Python · smoke config trained on that real data (10.4→7.0 @100 steps) · `eval.py
---fast` end-to-end on smoke ckpts, incl. offline tokenizer load from `<data>/tokenizer` (E1 ppl 854
-vs random-init 33415; E2/E3 0% as expected at this scale) · `--gpt2` baseline sampler downloads and
-samples (33% AST-valid spot check) · `export.py` 57→10 MB with `--verify` greedy-identical · Gradio
-app serves HTTP 200 and completes on CPU (fp16 file loads as fp32 on CPU).
-**Not yet tested:** T4 throughput/memory (Notebook 02 `MODE="bench"`), DDP on CUDA, full-size
-800M-token prep on Kaggle, HF Space deploy, notebook 03 on Kaggle.
+## State: TRAINED (Day 1, Fri 2 Oct — ran overnight, a day ahead of plan)
+Everything ran via `kaggle/push_day1.py` (account `rehancore`, access-token auth works, no
+kaggle.json needed). Kernels: `pygpt-01-prepare-data` · `pygpt-02-train` · `pygpt-03-eval-demo`.
+- **Data (nb01):** 800M train + 5M val tokens, real codeparrot-clean stream. eos id **0**
+  (ignore transformers' "eos_token_id … got 50256" warning — stale Hub metadata).
+- **Training (nb02 v3):** sanity 6/6 on T4×2 → bench 34k tok/s, peak 8.3 GB, resume tested →
+  main run 6,100 steps = 799.5M tokens (1 epoch) in **6 h 45 min**, **val loss 1.6852** (< 1.8 ✓).
+- **Eval (nb03 v2):** val ppl **5.24** (random-init 38,487) · AST-valid **59%** vs GPT-2 **10%**
+  vs random 0% · pass@1/pass@10 **0** for both ours and GPT-2 (honest "plausible not correct" —
+  it's the limitations slide, samples in `results/samples.md`). All real numbers in
+  `results/metrics.json`; curve in `results/loss_curve.png`; slides outline already filled.
+- **Export + demo:** fp16 export verified greedy-identical on Kaggle; Space bundle in nb03 output
+  (`space/`, copy in `build/nb03_out/space/`, 214 MB). **KV cache added to `model.generate`**
+  (outputs identical, sanity check 5 asserts it): laptop CPU does 96 tokens in **2.4 s** (40 tok/s).
+**Still to do:** HF Space deploy (needs HF write token from the user) · PPTX from
+`slides/slides_outline.md` · demo video + screenshots · rehearse · VS Code stretch.
+Gotchas: Kaggle kernel logs are only readable via API *after* a session ends; wait ~2 min after a
+kernel completes before pushing a dependent kernel (output mounts finalize asynchronously — that
+race caused nb03 v1's ERROR).
 
 ## Key numbers / decisions
 - tokens/step = micro_batch(16) × 512 × 2 GPUs × grad_accum(8) = 131,072; `max_iters` set from

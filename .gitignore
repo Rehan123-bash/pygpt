@@ -8,6 +8,6 @@ data/tiny/
 *.pt
 *.safetensors
 .ipynb_checkpoints/
-results/*.png
+
 build/
 kaggle/kernel-metadata.json

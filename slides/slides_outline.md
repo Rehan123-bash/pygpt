@@ -1,7 +1,7 @@
 # PyGPT — slide deck outline (13 slides, 7–8 min talk + 2 min demo)
 
-Numbers marked `⟨…⟩` come from the real run: fill from `results/metrics.json`,
-`loss_curve.png`, and Notebook 02's bench output. Criterion mapping is PROJECT.md §12.
+All numbers below are REAL, from the Oct 2 training run (`results/metrics.json`,
+`results/loss_curve.png`, Notebook 02 bench). Criterion mapping is PROJECT.md §12.
 
 ---
 
@@ -20,13 +20,17 @@ Table (from PROJECT.md §3.1): GPT-2 (2019, 124M, English) · Codex/Copilot (202
 **Gap:** everything is either closed or needs 100–10,000× our compute. None teaches you how a code LM is *built*. PyGPT = complete, reproducible, honest pipeline at student scale.
 
 ## 4 · Feasibility (C1)
-- Compute math: 6·N·D = 6 × 1.1e8 × 5e8 ≈ **3.3e17 FLOPs** → ~3.5–6 h on Kaggle's 2× T4 at 20–30% utilization. Fits a 10 h session.
-- Measured: ⟨tok/s from bench⟩ tok/s → ⟨N⟩M tokens in ⟨H⟩ h. Chinchilla-optimal would be ~2.2B tokens: we are ~3–7× under-trained **by design** (limitations slide).
-- War story: AWS GPU quota denied twice → Kaggle free tier (30 GPU-h/week) was sufficient. Budget table: data 0 h (CPU), smoke 2 h, main run 10 h, reserve 11 h.
+- Compute math: 6·N·D = 6 × 1.1e8 × 8e8 ≈ **5.3e17 FLOPs** → predicted ~6 h on Kaggle's 2× T4 at 20–30% utilization. Fits a 10 h session.
+- Measured: **34,000 tok/s** on 2× T4 (fp16, DDP) → **799.5M tokens in 6 h 45 min**, one full epoch. Chinchilla-optimal would be ~2.2B tokens: we are ~3× under-trained **by design** (limitations slide).
+- War story: AWS GPU quota denied twice → Kaggle free tier (30 GPU-h/week) was sufficient. Actual spend: data prep 0 GPU-h (CPU session), sanity+bench 0.3 h, main run 6.75 h, eval 0.2 h ≈ **7.3 of 30 weekly GPU-hours**.
 
 ## 5 · Objectives O1–O7 (C2)
-The measurable table from PROJECT.md §4.1 — one row each, green check marks added live:
-O1 model from scratch (init loss 10.4 ✓ causal mask ✓) · O2 corpus (⟨…⟩M tokens ✓) · O3 val loss < 1.8 (⟨…⟩) · O4 eval vs baselines (⟨…⟩) · O5 deployed app (⟨URL⟩) · O6 design↔code sync (slide 11) · O7 stretch: VS Code.
+The measurable table from PROJECT.md §4.1 — one row each, with the achieved value:
+O1 model from scratch (init loss 10.42 ≈ ln 32768 ✓, causal-mask test ✓, 110.5M params ✓) ·
+O2 corpus (800M train + 5M val tokens ✓) · O3 val loss < 1.8 (**1.685** ✓, ppl 5.4) ·
+O4 eval vs baselines (AST-valid **59%** vs GPT-2 10% vs random 0% ✓; pass@10 0 — honest) ·
+O5 deployed app (96 tokens in **2.4 s** on laptop CPU with KV cache ✓; Space ⟨URL⟩) ·
+O6 design↔code sync (slide 11) · O7 stretch: VS Code.
 
 ## 6 · Methodology pipeline (C2)
 The §4.2 diagram, one box per stage, each labeled with its file:
@@ -44,9 +48,14 @@ Why each piece (one line each): pre-LN = stable at depth · weight tying = −25
   Each row gets a one-word "why" (stability / throughput / memory / generalization).
 
 ## 9 · Results (C2, C3)
-- `loss_curve.png`: 10.4 → ⟨final⟩ in ⟨…⟩ h / ⟨…⟩M tokens.
-- Table: | metric | random init | GPT-2 124M | **PyGPT** |: val ppl ⟨32768 / — / …⟩ · AST-valid % ⟨~0 / … / …⟩ · pass@1 ⟨…⟩ · pass@10 ⟨…⟩.
-- 2–3 short samples from `samples.md` (one good, one mediocre). Honesty line: "plausible > correct at this scale."
+- `loss_curve.png`: 10.4 → **1.685 val** (train 1.364) in 6.75 h / 799.5M tokens.
+- Table: | metric | random init | GPT-2 124M | **PyGPT (ours)** |
+  val perplexity: 38,487 / (different tokenizer — n/a) / **5.24** ·
+  AST-valid %: 0 / 10 / **59** · pass@1: — / 0 / 0 · pass@10: — / 0 / 0.
+- Samples from `results/samples.md`: show read_json sample 2 (idiomatic `with open… json.load`, one
+  missing import from being right) and Stack sample 1 (correct class skeleton, wrong method names).
+- Honesty line: "59% of samples parse as Python — 6× vanilla GPT-2 — but 0/5 toy tasks pass
+  hidden tests at pass@10. 10 GPU-hours buys plausible, not correct. CodeParrot used ~50–100× more."
 
 ## 10 · Live demo (C4)
 Switch to the Space (pre-warmed). Prompts A (fibonacci) → B (NumPy) → C (class Stack) → temperature 0.2 vs 0.9 → failure case F (sudoku).
@@ -58,7 +67,10 @@ Left: repo tree. Right: §6.2 table — design component → file → symbol →
 Line: "Every box on slide 7 names the class that implements it; the repo is public."
 
 ## 12 · Limitations & future work (C1)
-Under-trained vs Chinchilla (~3–7×) · 512 context · no instruction tuning ("write a function that…" won't work) · completion ≠ correctness (pass@k shows it) · future: own tokenizer, longer training, FIM objective, VS Code extension ⟨or demo it if done⟩.
+Under-trained vs Chinchilla (~3×: 0.8B of ~2.2B optimal tokens) · 512 context · no instruction
+tuning ("write a function that…" won't work) · completion ≠ correctness (pass@10 = 0 shows it
+honestly) · future: own tokenizer, longer training (22 GPU-h/week left unused!), FIM objective,
+VS Code extension ⟨or demo it if done⟩.
 
 ## 13 · References
 Vaswani 17 · Radford 19 (GPT-2) · Chen 21 (Codex/HumanEval) · Kocetkov 22 / Li 23 (Stack/StarCoder) · Rozière 23 (Code Llama) · Kaplan 20 / Hoffmann 22 (scaling) · Sennrich 16 (BPE) · Loshchilov 19 (AdamW) · Micikevicius 18 (fp16) · Press & Wolf 17 (tying) · Holtzman 20 (nucleus) · Karpathy nanoGPT.
