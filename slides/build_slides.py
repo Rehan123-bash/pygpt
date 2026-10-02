@@ -149,7 +149,7 @@ table(s, ["#", "Objective", "Target", "Achieved"], [
     ["O3", "Useful loss on free GPUs", "val loss < 1.8 in ≤ 10 GPU-h", "1.685 in 6.75 h ✓ (ppl 5.24)"],
     ["O4", "Quantitative eval vs baselines", "ppl, AST-validity, pass@k", "59% AST-valid vs GPT-2 10% ✓ · pass@10 = 0 (honest)"],
     ["O5", "Deployed completion app", "30-token prompt answered < 15 s", "2.4 s for 96 tokens on laptop CPU ✓"],
-    ["O6", "Design ↔ implementation sync", "map table + public repo", "slide 11 + github.com/Rehan123-bash/pygpt ✓"],
+    ["O6", "Design ↔ implementation sync", "map table + public repo", "slide 11 + GitHub + hf.co/rehannn11223/pygpt ✓"],
     ["O7", "(stretch) VS Code extension", "60-s video", "future work"],
 ], size=12)
 
@@ -251,7 +251,7 @@ table(s, ["Design component", "File · symbol", "Verified by"], [
 ], size=12)
 tb = s.shapes.add_textbox(Inches(0.6), Inches(6.3), Inches(12), Inches(0.8))
 p = tb.text_frame.paragraphs[0]
-p.text = "Public repo: github.com/Rehan123-bash/pygpt  —  6 sanity checks gate every training run"
+p.text = "Code: github.com/Rehan123-bash/pygpt  ·  Weights + runnable demo: huggingface.co/rehannn11223/pygpt"
 p.font.size, p.font.color.rgb = Pt(15), ACCENT
 
 # 12 --------------------------------------------------------------- limitations

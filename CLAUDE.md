@@ -75,7 +75,8 @@ VS Code stretch.
 now require PRO (policy change; static Spaces only are free). Primary demo = laptop app
 (verified, offline, 2.4 s/96 tok). Backup = Kaggle interactive `GRADIO_SHARE=1`. Goes on
 slide 4 next to the AWS denial as a feasibility finding. HF token (user `rehannn11223`,
-fine-grained) installed at `~/.cache/huggingface/token`; staged bundle in `build/space_deploy/`.
+fine-grained) installed at `~/.cache/huggingface/token`. **Weights + demo published (user-approved):
+https://huggingface.co/rehannn11223/pygpt** (model repo, free tier).
 Gotchas: Kaggle kernel logs are only readable via API *after* a session ends; wait ~2 min after a
 kernel completes before pushing a dependent kernel (output mounts finalize asynchronously — that
 race caused nb03 v1's ERROR).

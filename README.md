@@ -4,6 +4,10 @@ Course project: train a decoder-only transformer on Python source code and ship 
 code-completion web app. Full design, feasibility analysis, evaluation protocol and the
 3-day plan are in [PROJECT.md](PROJECT.md).
 
+**Results (Oct 2026 run):** val loss 1.685 (ppl 5.24) after one epoch over 800M Python tokens
+(6.75 h on Kaggle 2×T4) · 59% of sampled completions parse as valid Python (vanilla GPT-2: 10%).
+**Trained weights + runnable demo:** https://huggingface.co/rehannn11223/pygpt
+
 ## Layout
 
 | Path | What |
