@@ -133,7 +133,7 @@ COMPILE = False
 import glob
 DATA_DIR = "/kaggle/input/pygpt-python-tokens"
 if MODE != "sanity" and not os.path.exists(DATA_DIR + "/train.bin"):
-    hits = glob.glob("/kaggle/input/*/train.bin")
+    hits = glob.glob("/kaggle/input/**/train.bin", recursive=True)
     assert hits, "add the pygpt-python-tokens dataset or Notebook 01's output as an input"
     DATA_DIR = os.path.dirname(hits[0])
 print("DATA_DIR =", DATA_DIR)
@@ -223,13 +223,16 @@ Steps: `eval.py` (metrics + plots + samples, with the GPT-2 baseline) → `expor
     code(GET_CODE),
     code('''
 import glob, os
+for root in sorted(glob.glob("/kaggle/input/*")):           # show what actually mounted
+    print(root, "->", sorted(os.listdir(root))[:12])
 DATA_DIR = "/kaggle/input/pygpt-python-tokens"
 if not os.path.exists(DATA_DIR + "/val.bin"):
-    hits = glob.glob("/kaggle/input/*/val.bin")
+    hits = glob.glob("/kaggle/input/**/val.bin", recursive=True)
     assert hits, "add the pygpt-python-tokens dataset or Notebook 01's output as an input"
     DATA_DIR = os.path.dirname(hits[0])
 # find ckpt_best.pt from the Notebook 02 input (falls back to ckpt_latest.pt)
-cands = sorted(glob.glob("/kaggle/input/*/ckpt_best.pt")) or sorted(glob.glob("/kaggle/input/*/ckpt_latest.pt"))
+cands = (sorted(glob.glob("/kaggle/input/**/ckpt_best.pt", recursive=True))
+         or sorted(glob.glob("/kaggle/input/**/ckpt_latest.pt", recursive=True)))
 assert cands, "add Notebook 02's latest version as an input (Add Input -> Your Work)"
 CKPT = cands[0]
 LOG = os.path.join(os.path.dirname(CKPT), "log.csv")
