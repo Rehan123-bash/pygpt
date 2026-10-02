@@ -89,8 +89,15 @@ stop_ok = g3.shape[1] == 11
 long_prompt = torch.randint(0, small.vocab_size, (1, 100))
 g4 = m.generate(long_prompt, max_new_tokens=3, temperature=0.0)
 crop_ok = g4.shape[1] == 103
-check("generate", shape_ok and greedy_ok and stop_ok and crop_ok,
-      f"shape={shape_ok} greedy_deterministic={greedy_ok} stop_token={stop_ok} long_prompt_crop={crop_ok}")
+# KV cache must not change the outputs (short prompt and context-limit case)
+c1 = torch.equal(m.generate(prompt, 15, temperature=0.0, use_cache=True),
+                 m.generate(prompt, 15, temperature=0.0, use_cache=False))
+c2 = torch.equal(m.generate(long_prompt, 8, temperature=0.0, use_cache=True),
+                 m.generate(long_prompt, 8, temperature=0.0, use_cache=False))
+cache_ok = c1 and c2
+check("generate", shape_ok and greedy_ok and stop_ok and crop_ok and cache_ok,
+      f"shape={shape_ok} greedy_deterministic={greedy_ok} stop_token={stop_ok} "
+      f"long_prompt_crop={crop_ok} kv_cache_equiv={cache_ok}")
 
 # 6. main-config parameter count
 main_cfg = GPTConfig(vocab_size=32768, block_size=512, n_layer=12, n_head=12, n_embd=768)

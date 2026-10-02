@@ -69,7 +69,11 @@ class CausalSelfAttention(nn.Module):
                 torch.tril(torch.ones(config.block_size, config.block_size)).view(1, 1, config.block_size, config.block_size),
             )
 
-    def forward(self, x):
+    def forward(self, x, past_kv=None):
+        """
+        past_kv: cached (k, v) from previous generation steps. At inference, passing the
+        cache means x holds only the NEW token(s); k/v for old positions are not recomputed.
+        """
         B, T, C = x.shape                                   # batch, time, channels
         q, k, v = self.c_attn(x).split(self.n_embd, dim=2)
         hd = C // self.n_head
@@ -77,22 +81,29 @@ class CausalSelfAttention(nn.Module):
         q = q.view(B, T, self.n_head, hd).transpose(1, 2)
         k = k.view(B, T, self.n_head, hd).transpose(1, 2)
         v = v.view(B, T, self.n_head, hd).transpose(1, 2)
+        if past_kv is not None:
+            k = torch.cat((past_kv[0], k), dim=2)
+            v = torch.cat((past_kv[1], v), dim=2)
+        new_kv = (k, v)
 
         if self.use_sdpa:
+            # With a cache the query is the single newest token: it may attend to every
+            # cached position, so no causal mask is needed (and would be wrong).
             y = F.scaled_dot_product_attention(
                 q, k, v, attn_mask=None,
                 dropout_p=self.dropout if self.training else 0.0,
-                is_causal=True,
+                is_causal=past_kv is None,
             )
         else:
-            att = (q @ k.transpose(-2, -1)) * (1.0 / math.sqrt(hd))     # (B, nh, T, T)
-            att = att.masked_fill(self.mask[:, :, :T, :T] == 0, float("-inf"))
+            att = (q @ k.transpose(-2, -1)) * (1.0 / math.sqrt(hd))     # (B, nh, T, Tk)
+            if past_kv is None:
+                att = att.masked_fill(self.mask[:, :, :T, :T] == 0, float("-inf"))
             att = F.softmax(att, dim=-1)
             att = self.attn_dropout(att)
             y = att @ v                                                 # (B, nh, T, hd)
 
         y = y.transpose(1, 2).contiguous().view(B, T, C)   # re-assemble heads
-        return self.resid_dropout(self.c_proj(y))
+        return self.resid_dropout(self.c_proj(y)), new_kv
 
 
 class MLP(nn.Module):
@@ -119,10 +130,11 @@ class Block(nn.Module):
         self.ln_2 = LayerNorm(config.n_embd, bias=config.bias)
         self.mlp = MLP(config)
 
-    def forward(self, x):
-        x = x + self.attn(self.ln_1(x))
+    def forward(self, x, past_kv=None):
+        attn_out, new_kv = self.attn(self.ln_1(x), past_kv)
+        x = x + attn_out
         x = x + self.mlp(self.ln_2(x))
-        return x
+        return x, new_kv
 
 
 class GPT(nn.Module):
@@ -164,19 +176,24 @@ class GPT(nn.Module):
             n -= self.transformer.wpe.weight.numel()
         return n
 
-    def forward(self, idx, targets=None):
+    def forward(self, idx, targets=None, past_kvs=None, use_cache=False):
         """
         idx:     (B, T) token ids
         targets: (B, T) next-token ids, or None at inference
-        returns: logits (B, T, vocab), loss (scalar or None)
+        past_kvs/use_cache: KV cache for fast generation; see generate()
+        returns: logits (B, T, vocab), loss (scalar or None) [, new_kvs if use_cache]
         """
         B, T = idx.shape
-        assert T <= self.config.block_size, f"sequence length {T} > block_size {self.config.block_size}"
-        pos = torch.arange(0, T, dtype=torch.long, device=idx.device)
+        past_len = 0 if past_kvs is None else past_kvs[0][0].size(2)
+        assert past_len + T <= self.config.block_size, \
+            f"sequence length {past_len + T} > block_size {self.config.block_size}"
+        pos = torch.arange(past_len, past_len + T, dtype=torch.long, device=idx.device)
 
         x = self.transformer.drop(self.transformer.wte(idx) + self.transformer.wpe(pos))
-        for block in self.transformer.h:
-            x = block(x)
+        new_kvs = []
+        for i, block in enumerate(self.transformer.h):
+            x, kv = block(x, past_kvs[i] if past_kvs is not None else None)
+            new_kvs.append(kv)
         x = self.transformer.ln_f(x)
 
         if targets is not None:
@@ -187,6 +204,8 @@ class GPT(nn.Module):
             # inference: only the last position's logits are needed
             logits = self.lm_head(x[:, [-1], :])
             loss = None
+        if use_cache:
+            return logits, loss, new_kvs
         return logits, loss
 
     def configure_optimizers(self, weight_decay, learning_rate, betas, device_type):
@@ -208,7 +227,8 @@ class GPT(nn.Module):
         return torch.optim.AdamW(groups, lr=learning_rate, betas=betas, **extra)
 
     @torch.no_grad()
-    def generate(self, idx, max_new_tokens, temperature=1.0, top_k=None, top_p=None, stop_token_id=None):
+    def generate(self, idx, max_new_tokens, temperature=1.0, top_k=None, top_p=None, stop_token_id=None,
+                 use_cache=True):
         """
         Autoregressive sampling.
           temperature -> 0: greedy. Higher = more random.
@@ -216,11 +236,24 @@ class GPT(nn.Module):
           top_p:  nucleus sampling (Holtzman et al. 2020): keep the smallest set of tokens
                   whose cumulative probability >= p.
           stop_token_id: stop early when this id is produced (e.g. <|endoftext|>).
+          use_cache: keep per-layer (k, v) so each step processes 1 token, not the whole
+                  sequence (~10x faster on CPU). Falls back to re-encoding the cropped
+                  window when the context limit is reached; outputs match use_cache=False.
         """
         self.eval()
+        past = None
         for _ in range(max_new_tokens):
-            idx_cond = idx if idx.size(1) <= self.config.block_size else idx[:, -self.config.block_size:]
-            logits, _ = self(idx_cond)
+            if use_cache and past is not None and past[0][0].size(2) < self.config.block_size:
+                # fast path: feed only the newest token, reuse cached k/v for the rest
+                logits, _, past = self(idx[:, -1:], past_kvs=past, use_cache=True)
+            else:
+                idx_cond = idx if idx.size(1) <= self.config.block_size else idx[:, -self.config.block_size:]
+                if use_cache:
+                    logits, _, past = self(idx_cond, use_cache=True)     # prime the cache
+                    if past[0][0].size(2) >= self.config.block_size:
+                        past = None          # context full: slide the window next step
+                else:
+                    logits, _ = self(idx_cond)
             logits = logits[:, -1, :].float()
 
             if temperature <= 1e-6:

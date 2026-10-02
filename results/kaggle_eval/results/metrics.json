@@ -1,0 +1,101 @@
+{
+  "ckpt": {
+    "path": "/kaggle/input/notebooks/rehancore/pygpt-02-train/ckpt_best.pt",
+    "iter_num": 6000,
+    "tokens_seen": 786432000,
+    "params_M": 110.5
+  },
+  "settings": {
+    "n_ast_samples": 5,
+    "n_func_samples": 10,
+    "max_new_tokens": 96,
+    "temperature": 0.6,
+    "top_k": 50,
+    "top_p": 0.95
+  },
+  "e1_val": {
+    "ours": {
+      "loss": 1.6573,
+      "perplexity": 5.24,
+      "tokens_evaluated": 327680
+    },
+    "random_init": {
+      "loss": 10.5581,
+      "perplexity": 38486.96,
+      "tokens_evaluated": 16384
+    }
+  },
+  "e2_ast_validity": {
+    "ours": {
+      "valid_pct": 59.0,
+      "n_samples": 100
+    },
+    "random_init": {
+      "valid_pct": 0.0,
+      "n_samples": 20
+    },
+    "gpt2": {
+      "valid_pct": 10.0,
+      "n_samples": 100
+    }
+  },
+  "e3_functional": {
+    "ours": {
+      "pass@1": 0.0,
+      "pass@10": 0.0,
+      "per_task": {
+        "fibonacci": {
+          "correct": 0,
+          "n": 10
+        },
+        "is_prime": {
+          "correct": 0,
+          "n": 10
+        },
+        "reverse_string": {
+          "correct": 0,
+          "n": 10
+        },
+        "factorial": {
+          "correct": 0,
+          "n": 10
+        },
+        "max_of_list": {
+          "correct": 0,
+          "n": 10
+        }
+      }
+    },
+    "gpt2": {
+      "pass@1": 0.0,
+      "pass@10": 0.0,
+      "per_task": {
+        "fibonacci": {
+          "correct": 0,
+          "n": 10
+        },
+        "is_prime": {
+          "correct": 0,
+          "n": 10
+        },
+        "reverse_string": {
+          "correct": 0,
+          "n": 10
+        },
+        "factorial": {
+          "correct": 0,
+          "n": 10
+        },
+        "max_of_list": {
+          "correct": 0,
+          "n": 10
+        }
+      }
+    }
+  },
+  "e4_curve": {
+    "final_train": 1.3643,
+    "final_val": 1.6852
+  },
+  "eval_minutes": 6.4
+}
