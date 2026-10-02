@@ -546,8 +546,10 @@ def solve_sudoku(board):
 
 ## Appendix C — Presentation-day checklist
 
-- [ ] HF Space loads and completes Prompt A in < 15 s (warm it up 5 min before)
-- [ ] Laptop fallback: `python app/app.py` works offline (weights + tokenizer local)
+- [ ] Laptop demo: `python app/app.py` works offline (weights + tokenizer in `app/`)
+- [ ] **The app header says "step 6000, val loss 1.685"** — if not, a stale server or wrong
+      weights are loaded (kill all python, relaunch; this bit us once on Day 2)
+- [ ] Backup: Kaggle notebook, interactive, `GRADIO_SHARE=1 python app/app.py` → public link
 - [ ] Demo video (60 s) and screenshots of all six prompts in the slides folder
 - [ ] Slides exported to PDF as well as PPTX
 - [ ] `results/metrics.json` numbers match the results slide
