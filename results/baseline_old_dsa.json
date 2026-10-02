@@ -1,0 +1,29 @@
+{
+  "model": "old ckpt step 6000 (val 1.685)",
+  "tasks": {
+    "pass@1": 0.0,
+    "pass@10": 0.0,
+    "per_task": {
+      "is_prime": {
+        "correct": 0,
+        "n": 10
+      },
+      "add": {
+        "correct": 0,
+        "n": 10
+      },
+      "multiply": {
+        "correct": 0,
+        "n": 10
+      },
+      "divide": {
+        "correct": 0,
+        "n": 10
+      },
+      "find_median": {
+        "correct": 0,
+        "n": 10
+      }
+    }
+  }
+}

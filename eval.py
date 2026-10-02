@@ -60,37 +60,41 @@ AST_PROMPTS = [
 ]
 
 # ---------------------------------------------------------------------------
-# E3: mini functional test ("HumanEval-lite"): prompt, entry point, 3 hidden tests
+# E3: mini functional test. Prompts are written in TheAlgorithms style (type
+# hints, docstring, doctest examples) to match the DSA curriculum data.
 # ---------------------------------------------------------------------------
 FUNC_TASKS = [
-    dict(name="fibonacci",
-         prompt='def fibonacci(n):\n    """Return the nth Fibonacci number, with fibonacci(0) == 0 and fibonacci(1) == 1."""\n',
-         tests=["assert fibonacci(1) == 1", "assert fibonacci(2) == 1", "assert fibonacci(10) == 55"]),
     dict(name="is_prime",
-         prompt='def is_prime(n):\n    """Return True if n is a prime number, else False."""\n',
+         prompt='def is_prime(number: int) -> bool:\n'
+                '    """Return True if number is a prime number, else False.\n\n'
+                '    >>> is_prime(7)\n    True\n    >>> is_prime(10)\n    False\n    """\n',
          tests=["assert is_prime(2) == True", "assert is_prime(9) == False", "assert is_prime(17) == True"]),
-    dict(name="reverse_string",
-         prompt='def reverse_string(s):\n    """Return the string s reversed."""\n',
-         tests=['assert reverse_string("abc") == "cba"', 'assert reverse_string("") == ""',
-                'assert reverse_string("ab") == "ba"']),
-    dict(name="factorial",
-         prompt='def factorial(n):\n    """Return n factorial, with factorial(0) == 1."""\n',
-         tests=["assert factorial(0) == 1", "assert factorial(3) == 6", "assert factorial(5) == 120"]),
-    dict(name="max_of_list",
-         prompt='def max_of_list(numbers):\n    """Return the largest number in the list, without using max()."""\n',
-         tests=["assert max_of_list([3, 1, 2]) == 3", "assert max_of_list([-5, -2]) == -2",
-                "assert max_of_list([7]) == 7"]),
+    dict(name="add",
+         prompt='def add(a: int, b: int) -> int:\n'
+                '    """Return the sum of a and b.\n\n'
+                '    >>> add(2, 3)\n    5\n    >>> add(-1, 1)\n    0\n    """\n',
+         tests=["assert add(2, 3) == 5", "assert add(-1, 1) == 0", "assert add(0, 0) == 0"]),
+    dict(name="multiply",
+         prompt='def multiply(a: int, b: int) -> int:\n'
+                '    """Return a multiplied by b.\n\n'
+                '    >>> multiply(3, 4)\n    12\n    >>> multiply(-2, 3)\n    -6\n    """\n',
+         tests=["assert multiply(3, 4) == 12", "assert multiply(-2, 3) == -6", "assert multiply(0, 5) == 0"]),
+    dict(name="divide",
+         prompt='def divide(a: float, b: float) -> float:\n'
+                '    """Return a divided by b.\n\n'
+                '    >>> divide(10, 2)\n    5.0\n    >>> divide(7, 2)\n    3.5\n    """\n',
+         tests=["assert divide(10, 2) == 5.0", "assert divide(7, 2) == 3.5", "assert divide(-6, 3) == -2.0"]),
+    dict(name="find_median",
+         prompt='def find_median(numbers: list) -> float:\n'
+                '    """Return the median value of a list of numbers.\n\n'
+                '    >>> find_median([3, 1, 2])\n    2\n    >>> find_median([1, 2, 3, 4])\n    2.5\n    """\n',
+         tests=["assert find_median([3, 1, 2]) == 2", "assert find_median([1, 2, 3, 4]) == 2.5",
+                "assert find_median([7]) == 7"]),
 ]
 
-# E5: the 6 demo prompts from PROJECT.md Appendix B
-DEMO_PROMPTS = [
-    ("A", 'def fibonacci(n):\n    """Return the nth Fibonacci number."""\n'),
-    ("B", 'import numpy as np\n\ndef normalize(arr):\n    """Scale arr to zero mean and unit variance."""\n'),
-    ("C", 'class Stack:\n    def __init__(self):\n'),
-    ("D", 'def is_prime(n):\n'),
-    ("E", 'def read_json(path):\n    """Load a JSON file and return the parsed object."""\n'),
-    ("F", 'def solve_sudoku(board):\n'),
-]
+# E5: demo prompts = the five functional tasks (A-E) + the honest failure case (F)
+DEMO_PROMPTS = [(chr(65 + i), t["prompt"]) for i, t in enumerate(FUNC_TASKS)]
+DEMO_PROMPTS.append(("F", 'def solve_sudoku(board):\n'))
 
 
 # ---------------------------------------------------------------------------
