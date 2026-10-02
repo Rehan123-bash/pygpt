@@ -22,7 +22,7 @@ Table (from PROJECT.md §3.1): GPT-2 (2019, 124M, English) · Codex/Copilot (202
 ## 4 · Feasibility (C1)
 - Compute math: 6·N·D = 6 × 1.1e8 × 8e8 ≈ **5.3e17 FLOPs** → predicted ~6 h on Kaggle's 2× T4 at 20–30% utilization. Fits a 10 h session.
 - Measured: **34,000 tok/s** on 2× T4 (fp16, DDP) → **799.5M tokens in 6 h 45 min**, one full epoch. Chinchilla-optimal would be ~2.2B tokens: we are ~3× under-trained **by design** (limitations slide).
-- War story: AWS GPU quota denied twice → Kaggle free tier (30 GPU-h/week) was sufficient. Actual spend: data prep 0 GPU-h (CPU session), sanity+bench 0.3 h, main run 6.75 h, eval 0.2 h ≈ **7.3 of 30 weekly GPU-hours**.
+- War stories (free-tier landscape is a moving target — measured, not assumed): AWS GPU quota denied twice → Kaggle free tier sufficed. HF free Gradio Spaces discontinued mid-project (402: PRO required) → laptop demo primary. Actual spend: data prep 0 GPU-h (CPU session), sanity+bench 0.3 h, main run 6.75 h, eval 0.2 h ≈ **7.3 of 30 weekly GPU-hours**.
 
 ## 5 · Objectives O1–O7 (C2)
 The measurable table from PROJECT.md §4.1 — one row each, with the achieved value:
@@ -58,8 +58,9 @@ Why each piece (one line each): pre-LN = stable at depth · weight tying = −25
   hidden tests at pass@10. 10 GPU-hours buys plausible, not correct. CodeParrot used ~50–100× more."
 
 ## 10 · Live demo (C4)
-Switch to the Space (pre-warmed). Prompts A (fibonacci) → B (NumPy) → C (class Stack) → temperature 0.2 vs 0.9 → failure case F (sudoku).
-Backup: laptop `python app/app.py` → video → screenshots (in this order).
+`python app/app.py` on this laptop — fully offline, ~2.4 s per completion (KV cache).
+Prompts A (fibonacci) → B (NumPy) → C (class Stack) → temperature 0.2 vs 0.9 → failure case F (sudoku).
+Backup: Kaggle notebook with `GRADIO_SHARE=1` (public link) → video → screenshots (in this order).
 
 ## 11 · Design ↔ implementation (C4)
 Left: repo tree. Right: §6.2 table — design component → file → symbol → how it was verified

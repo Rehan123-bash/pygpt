@@ -69,8 +69,13 @@ kaggle.json needed). Kernels: `pygpt-01-prepare-data` · `pygpt-02-train` · `py
 - **Export + demo:** fp16 export verified greedy-identical on Kaggle; Space bundle in nb03 output
   (`space/`, copy in `build/nb03_out/space/`, 214 MB). **KV cache added to `model.generate`**
   (outputs identical, sanity check 5 asserts it): laptop CPU does 96 tokens in **2.4 s** (40 tok/s).
-**Still to do:** HF Space deploy (needs HF write token from the user) · PPTX from
-`slides/slides_outline.md` · demo video + screenshots · rehearse · VS Code stretch.
+**Still to do:** PPTX from `slides/slides_outline.md` · demo video + screenshots · rehearse ·
+VS Code stretch.
+**Hosting finding (Fri):** HF returns **402** on Gradio Space creation — free-tier Gradio Spaces
+now require PRO (policy change; static Spaces only are free). Primary demo = laptop app
+(verified, offline, 2.4 s/96 tok). Backup = Kaggle interactive `GRADIO_SHARE=1`. Goes on
+slide 4 next to the AWS denial as a feasibility finding. HF token (user `rehannn11223`,
+fine-grained) installed at `~/.cache/huggingface/token`; staged bundle in `build/space_deploy/`.
 Gotchas: Kaggle kernel logs are only readable via API *after* a session ends; wait ~2 min after a
 kernel completes before pushing a dependent kernel (output mounts finalize asynchronously — that
 race caused nb03 v1's ERROR).
