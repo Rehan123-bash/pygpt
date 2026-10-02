@@ -126,12 +126,14 @@ GRAD_ACCUM = 8
 TIME_LIMIT_H = 10.0
 # From bench: MAX_ITERS = (tok_per_sec * TIME_LIMIT_H * 3600) // (MICRO_BATCH * 512 * N_GPUS * GRAD_ACCUM)
 MAX_ITERS = 3800
-RESUME_PATH = ""                # e.g. "/kaggle/input/02-train/ckpt_latest.pt"
+RESUME_PATH = ""                # empty = auto-find ckpt_latest.pt in /kaggle/input
+EXTRA_ARGS = ""                 # extra train.py overrides, e.g. "--learning_rate=2e-4 --min_lr=2e-5"
+DATA_DIR_OVERRIDE = ""          # set when several inputs have a train.bin (e.g. the DSA polish set)
 COMPILE = False
 # =============================================
 # data can arrive as the dataset "pygpt-python-tokens" or as Notebook 01's mounted output
 import glob
-DATA_DIR = "/kaggle/input/pygpt-python-tokens"
+DATA_DIR = DATA_DIR_OVERRIDE or "/kaggle/input/pygpt-python-tokens"
 if MODE != "sanity" and not os.path.exists(DATA_DIR + "/train.bin"):
     hits = glob.glob("/kaggle/input/**/train.bin", recursive=True)
     assert hits, "add the pygpt-python-tokens dataset or Notebook 01's output as an input"
@@ -169,16 +171,20 @@ if MODE == "main":
     !torchrun --standalone --nproc_per_node={N_GPUS} train.py --config config/gpt2_small_py.py \\
         --data_dir={DATA_DIR} --ckpt_dir=/kaggle/working --micro_batch_size={MICRO_BATCH} \\
         --grad_accum_steps={GRAD_ACCUM} --max_iters={MAX_ITERS} --time_limit_hours={TIME_LIMIT_H} \\
-        --compile={COMPILE}
+        --compile={COMPILE} {EXTRA_ARGS}
 '''),
     code('''
 if MODE == "resume":
-    assert RESUME_PATH, "set RESUME_PATH to the previous version's ckpt_latest.pt"
+    if not RESUME_PATH:
+        hits = sorted(glob.glob("/kaggle/input/**/ckpt_latest.pt", recursive=True))
+        assert hits, "add the previous training version as an input, or set RESUME_PATH"
+        RESUME_PATH = hits[0]
+    print("resuming from", RESUME_PATH)
     !cp {RESUME_PATH} /kaggle/working/ckpt_latest.pt
     !torchrun --standalone --nproc_per_node={N_GPUS} train.py --config config/gpt2_small_py.py \\
         --data_dir={DATA_DIR} --ckpt_dir=/kaggle/working --micro_batch_size={MICRO_BATCH} \\
         --grad_accum_steps={GRAD_ACCUM} --max_iters={MAX_ITERS} --time_limit_hours={TIME_LIMIT_H} \\
-        --resume=/kaggle/working/ckpt_latest.pt --compile={COMPILE}
+        --resume=/kaggle/working/ckpt_latest.pt --compile={COMPILE} {EXTRA_ARGS}
 '''),
     code('''
 # Loss curve from log.csv (works after main / resume)

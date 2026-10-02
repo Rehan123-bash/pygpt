@@ -1,0 +1,11 @@
+{
+  "vocab_size": 32768,
+  "eos_id": 0,
+  "sources": [
+    "https://github.com/TheAlgorithms/Python",
+    "https://github.com/keon/algorithms"
+  ],
+  "train_tokens": 1511231,
+  "val_tokens": 81228,
+  "files": 1797
+}

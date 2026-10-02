@@ -94,6 +94,8 @@ def set_nb02_params(nb_json, args):
     if args.max_iters: subs["MAX_ITERS"] = str(args.max_iters)
     if args.time_limit: subs["TIME_LIMIT_H"] = str(args.time_limit)
     if args.resume_path: subs["RESUME_PATH"] = f'"{args.resume_path}"'
+    if args.extra_args: subs["EXTRA_ARGS"] = f'"{args.extra_args}"'
+    if args.data_dir: subs["DATA_DIR_OVERRIDE"] = f'"{args.data_dir}"'
     for cell in nb_json["cells"]:
         if cell["cell_type"] == "code" and "SET THESE" in cell["source"]:
             src = cell["source"]
@@ -119,6 +121,8 @@ def push(user, name, args):
     kernel_sources = []
     if name == "nb02" and args.mode != "sanity":
         kernel_sources = [f"{user}/{NB['nb01'][1]}"]   # token data from notebook 01's output
+    if name == "nb02" and args.mode == "resume":
+        kernel_sources.append(f"{user}/{NB['nb02'][1]}")   # own previous version: the checkpoint
     if name == "nb03":
         kernel_sources = [f"{user}/{NB['nb01'][1]}", f"{user}/{NB['nb02'][1]}"]
 
@@ -126,7 +130,7 @@ def push(user, name, args):
         "id": f"{user}/{slug}", "title": slug,
         "code_file": ipynb, "language": "python", "kernel_type": "notebook",
         "is_private": True, "enable_gpu": gpu, "enable_tpu": False, "enable_internet": True,
-        "dataset_sources": [f"{user}/pygpt-code"],
+        "dataset_sources": [f"{user}/pygpt-code"] + args.extra_dataset,
         "kernel_sources": kernel_sources, "competition_sources": [], "model_sources": [],
     }
     if args.accelerator:
@@ -179,6 +183,10 @@ def main():
     ap.add_argument("--max-iters", type=int)
     ap.add_argument("--time-limit", type=float)
     ap.add_argument("--resume-path")
+    ap.add_argument("--extra-args", help='raw train.py overrides, e.g. "--learning_rate=2e-4 --min_lr=2e-5"')
+    ap.add_argument("--data-dir", help="explicit /kaggle/input/... data dir (skips autodetect)")
+    ap.add_argument("--extra-dataset", action="append", default=[],
+                    help="additional dataset_sources entries, e.g. rehancore/pygpt-algo-tokens")
     ap.add_argument("--accelerator", help='machine shape, if the account default is not T4 x2')
     ap.add_argument("--timeout-s", type=int, help="server-side max run seconds for this push")
     args = ap.parse_args()
