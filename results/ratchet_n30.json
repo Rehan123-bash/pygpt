@@ -1,0 +1,54 @@
+{
+  "old_1epoch": {
+    "pass@1": 0.06,
+    "pass@10": 0.389,
+    "per_task": {
+      "is_prime": {
+        "correct": 0,
+        "n": 30
+      },
+      "add": {
+        "correct": 0,
+        "n": 30
+      },
+      "multiply": {
+        "correct": 1,
+        "n": 30
+      },
+      "divide": {
+        "correct": 3,
+        "n": 30
+      },
+      "find_median": {
+        "correct": 5,
+        "n": 30
+      }
+    }
+  },
+  "new_2ep_dsa": {
+    "pass@1": 0.087,
+    "pass@10": 0.579,
+    "per_task": {
+      "is_prime": {
+        "correct": 0,
+        "n": 30
+      },
+      "add": {
+        "correct": 3,
+        "n": 30
+      },
+      "multiply": {
+        "correct": 5,
+        "n": 30
+      },
+      "divide": {
+        "correct": 3,
+        "n": 30
+      },
+      "find_median": {
+        "correct": 2,
+        "n": 30
+      }
+    }
+  }
+}

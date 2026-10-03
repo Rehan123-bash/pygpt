@@ -55,7 +55,19 @@ python app/app.py                                           # Gradio demo on :78
 python notebooks/build_notebooks.py                         # regenerate .ipynb after editing them
 ```
 
-## State: TRAINED (Day 1, Fri 2 Oct — ran overnight, a day ahead of plan)
+## State: FINAL MODEL SHIPPED (Sun 4 Oct, presentation day)
+Shipped ckpt = step 12900: 2 epochs over 800M Python tokens + 118M-token DSA curriculum
+(TheAlgorithms + codeparrot DSA-filtered; dataset `pygpt-algo-tokens`). Numbers (official,
+`results/metrics.json`): held-out-Python ppl **6.19** (5.24 pre-curriculum — specialization
+tax +0.18 nats, on the limitations slide) · AST-valid **57%** vs GPT-2 7% · **pass@10 0.58**
+(n=30, `results/ratchet_n30.json`) vs GPT-2 0.00 and vs 0.39 for the 1-epoch ckpt.
+**The newline/BPE finding (slide 8):** prompts must end at the closing `"""` — a trailing
+bare `\n` is the "dedent" token and makes the model close the function (pass@10 0 → 0.39
+from deleting one character). Task/app prompts fixed; E2 AST prompts left as-is on purpose.
+Old 1-epoch eval archived in `results/metrics_epoch1.json`. GPU spend ≈ 16.5/30 h.
+HF updated (weights+card+app). App header must say **step 12900, val loss 1.823**.
+
+## Earlier state (Day 1, Fri 2 Oct — first training night)
 Everything ran via `kaggle/push_day1.py` (account `rehancore`, access-token auth works, no
 kaggle.json needed). Kernels: `pygpt-01-prepare-data` · `pygpt-02-train` · `pygpt-03-eval-demo`.
 - **Data (nb01):** 800M train + 5M val tokens, real codeparrot-clean stream. eos id **0**

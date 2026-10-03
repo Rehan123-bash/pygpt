@@ -3,118 +3,172 @@
 ## Prompt A
 
 ```python
-def fibonacci(n):
-    """Return the nth Fibonacci number."""
+def is_prime(number: int) -> bool:
+    """Return True if number is a prime number, else False.
 
-def fibonacci_get_first_name(n):
-    """Return the first Fibonacci number."""
+    >>> is_prime(7)
+    True
+    >>> is_prime(10)
+    False
+    """
+
+    if number < 1:
+        return True
+
+    if number % 2 == 1:
+        return False
+
+    for i in range(1, int(math.sqrt(number) + 1), 2):
+        if number % i == 0 or number % (i + 2) == number:
+            return False
+
+    return True
+
 
 ```
 
 ```python
-def fibonacci(n):
-    """Return the nth Fibonacci number."""
-	return fibonacci_1_0[n]
+def is_prime(number: int) -> bool:
+    """Return True if number is a prime number, else False.
+
+    >>> is_prime(7)
+    True
+    >>> is_prime(10)
+    False
+    """
+    return number % 2 == 0
+
 
 ```
 
 ## Prompt B
 
 ```python
-import numpy as np
+def add(a: int, b: int) -> int:
+    """Return the sum of a and b.
 
-def normalize(arr):
-    """Scale arr to zero mean and unit variance."""
-	if arr.ndim == 2:
-		return arr
-	elif arr.ndim == 3:
-		return arr * arr
-	else:
-		raise ValueError("Unsupported axis for arr")
+    >>> add(2, 3)
+    5
+    >>> add(-1, 1)
+    0
+    """
+    return sum(a, b)
+
 
 ```
 
 ```python
-import numpy as np
+def add(a: int, b: int) -> int:
+    """Return the sum of a and b.
 
-def normalize(arr):
-    """Scale arr to zero mean and unit variance."""
-#    return np.median(arr, axis=-1)
-#    return np.mean(arr, axis=-1)
-#    return np.std(arr, axis=-1)
-#    return np.std(arr, axis=-1)
-#    return arr
-#   
-#   
-def get_data_names(arr):
-    """Get data names from array."""
-    return dict(arr.keys())
-#   
+    >>> add(2, 3)
+    5
+    >>> add(-1, 1)
+    0
+    """
+    return sum(a, b)
+
 
 ```
 
 ## Prompt C
 
 ```python
-class Stack:
-    def __init__(self):
-	self.stack = []
-    def append(self, p):
-        self.stack.append(p)
-    def remove(self, p):
-        self.stack.remove(p)
-    def __str__(self):
-        return "Stack: " + str(self.stack)
+def multiply(a: int, b: int) -> int:
+    """Return a multiplied by b.
+
+    >>> multiply(3, 4)
+    12
+    >>> multiply(-2, 3)
+    -6
+    """
+    return int(round(a / b))
+
 
 ```
 
 ```python
-class Stack:
-    def __init__(self):
-	self.stack = []
-	self.stack.append("Stack")
-	self.stack.append("Stack.Stack")
-	self.stack.append("Stack.Stack.Name")
-	self.stack.append("Stack.Stack.State")
-	self.stack.append("Stack.Stack.Name")
-	self.stack.append("Stack.Stack.State.StackName")
+def multiply(a: int, b: int) -> int:
+    """Return a multiplied by b.
+
+    >>> multiply(3, 4)
+    12
+    >>> multiply(-2, 3)
+    -6
+    """
+    return a + b
+
+
 ```
 
 ## Prompt D
 
 ```python
-def is_prime(n):
-	if n < 0:
-		return False
-	if n < 0:
-		return True
-	if n < 0:
-		return False
-	return True
+def divide(a: float, b: float) -> float:
+    """Return a divided by b.
+
+    >>> divide(10, 2)
+    5.0
+    >>> divide(7, 2)
+    3.5
+    """
+    return math.floor(math.log(a / b, 2)) + math.floor(math.log(b, 2))
+
 
 ```
 
 ```python
-def is_prime(n):
-	return n <= 1 or n == 0 or n == 1
+def divide(a: float, b: float) -> float:
+    """Return a divided by b.
+
+    >>> divide(10, 2)
+    5.0
+    >>> divide(7, 2)
+    3.5
+    """
+    return math.exp(math.pow(a, b, 2))
+
 
 ```
 
 ## Prompt E
 
 ```python
-def read_json(path):
-    """Load a JSON file and return the parsed object."""
-	yaml_data = open(path, "r").read()
-	return yaml_data
+def find_median(numbers: list) -> float:
+    """Return the median value of a list of numbers.
+
+    >>> find_median([3, 1, 2])
+    2
+    >>> find_median([1, 2, 3, 4])
+    2.5
+    """
+    for number in numbers:
+        if number in numbers[1:]:
+            return 1.0
+    return 0.0
+
 
 ```
 
 ```python
-def read_json(path):
-    """Load a JSON file and return the parsed object."""
-	with open(path, "r") as f:
-	    return json.load(f)
+def find_median(numbers: list) -> float:
+    """Return the median value of a list of numbers.
+
+    >>> find_median([3, 1, 2])
+    2
+    >>> find_median([1, 2, 3, 4])
+    2.5
+    """
+    if len(numbers) == 0:
+        return 0.0
+    median = 0.0
+    for number in numbers:
+        if number > 0:
+            median += number
+        else:
+            median += number
+    return median
+
 
 ```
 
@@ -122,26 +176,28 @@ def read_json(path):
 
 ```python
 def solve_sudoku(board):
-	for i in range(len(board)):
-		for j in range(len(board[i])):
-			if board[i][j] == "Yes" and board[i][j] == "No":
-				board[i][j] = "Yes"
-			else:
-				board[i][j] = "No"
-
+    """
+    Run the Silhoue method of a board.
+    """
+    for i in range(len(board) - 1):
+        print("[%d] solve Silhoue: %s" % (i, board[i]))
+        if board[i] == "W":
+            return
+        print("[%d] solve Silhoue: %s" % (i, board[i]))
 ```
 
 ```python
 def solve_sudoku(board):
-	"""
-	Ensures the Lights of a board.
-	"""
-	try:
-		board.lights.lights.lights_per_group = board.lights.lights_per_group
-	except AttributeError:
-		board.lights.lights.lights_per_group = 1
+    """
+    Find the least squares solution to the board.
 
-	l = len(board.lights)
-	while True:
-		try:
+    Return the product of the least squares solution to the board.
+
+    >>> solve_sudoku([1, 2, 3, 4])
+    2
+    """
+    # The combination of the first two digits digits is the sum of the digits
+    # of the board.
+    # The number of digits of the least squares of the board is equal to the
+    # number of digits of the board.
 ```
