@@ -33,15 +33,15 @@ TOKENIZER_PATH = os.environ.get("TOKENIZER_PATH", os.path.join(HERE, "tokenizer"
 # DSA curriculum phase of training, so these are the model's home turf.
 EXAMPLES = [
     'def is_prime(number: int) -> bool:\n    """Return True if number is a prime number, else False.\n\n'
-    '    >>> is_prime(7)\n    True\n    >>> is_prime(10)\n    False\n    """\n',
+    '    >>> is_prime(7)\n    True\n    >>> is_prime(10)\n    False\n    """',
     'def add(a: int, b: int) -> int:\n    """Return the sum of a and b.\n\n'
-    '    >>> add(2, 3)\n    5\n    """\n',
+    '    >>> add(2, 3)\n    5\n    """',
     'def multiply(a: int, b: int) -> int:\n    """Return a multiplied by b.\n\n'
-    '    >>> multiply(3, 4)\n    12\n    """\n',
+    '    >>> multiply(3, 4)\n    12\n    """',
     'def divide(a: float, b: float) -> float:\n    """Return a divided by b.\n\n'
-    '    >>> divide(10, 2)\n    5.0\n    """\n',
+    '    >>> divide(10, 2)\n    5.0\n    """',
     'def find_median(numbers: list) -> float:\n    """Return the median value of a list of numbers.\n\n'
-    '    >>> find_median([3, 1, 2])\n    2\n    >>> find_median([1, 2, 3, 4])\n    2.5\n    """\n',
+    '    >>> find_median([3, 1, 2])\n    2\n    >>> find_median([1, 2, 3, 4])\n    2.5\n    """',
 ]
 
 device = "cuda" if torch.cuda.is_available() else "cpu"

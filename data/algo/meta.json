@@ -1,0 +1,12 @@
+{
+  "vocab_size": 32768,
+  "eos_id": 0,
+  "sources": [
+    "https://github.com/TheAlgorithms/Python",
+    "codeparrot-clean-train filtered by DSA_DEF_RE"
+  ],
+  "train_tokens": 15569698,
+  "val_tokens": 756845,
+  "repo_files": 1365,
+  "stream_files": 3001
+}

@@ -198,6 +198,7 @@ table(s, ["Choice", "Value", "Why"], [
     ["Batching", "16 × 512 × 2 GPUs × grad-accum 8 = 131k tok/step", "large effective batch within 16 GB"],
     ["Multi-GPU", "DistributedDataParallel (torchrun)", "near-linear scaling on the 2 free T4s"],
     ["Safety", "grad clip 1.0 · ckpt/250 steps · tested resume", "fp16 spikes; Kaggle 12 h session cap"],
+    ["Prompt format", "prompts end at the closing \"\"\" — no trailing newline", "newline+indent is ONE BPE token; a bare \\n says “dedent next” and the model closes the function. Removing one character: pass@10 went 0 → 0.4"],
 ], size=12)
 
 # 9 ---------------------------------------------------------------- results

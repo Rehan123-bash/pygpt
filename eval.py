@@ -67,34 +67,34 @@ FUNC_TASKS = [
     dict(name="is_prime",
          prompt='def is_prime(number: int) -> bool:\n'
                 '    """Return True if number is a prime number, else False.\n\n'
-                '    >>> is_prime(7)\n    True\n    >>> is_prime(10)\n    False\n    """\n',
+                '    >>> is_prime(7)\n    True\n    >>> is_prime(10)\n    False\n    """',
          tests=["assert is_prime(2) == True", "assert is_prime(9) == False", "assert is_prime(17) == True"]),
     dict(name="add",
          prompt='def add(a: int, b: int) -> int:\n'
                 '    """Return the sum of a and b.\n\n'
-                '    >>> add(2, 3)\n    5\n    >>> add(-1, 1)\n    0\n    """\n',
+                '    >>> add(2, 3)\n    5\n    >>> add(-1, 1)\n    0\n    """',
          tests=["assert add(2, 3) == 5", "assert add(-1, 1) == 0", "assert add(0, 0) == 0"]),
     dict(name="multiply",
          prompt='def multiply(a: int, b: int) -> int:\n'
                 '    """Return a multiplied by b.\n\n'
-                '    >>> multiply(3, 4)\n    12\n    >>> multiply(-2, 3)\n    -6\n    """\n',
+                '    >>> multiply(3, 4)\n    12\n    >>> multiply(-2, 3)\n    -6\n    """',
          tests=["assert multiply(3, 4) == 12", "assert multiply(-2, 3) == -6", "assert multiply(0, 5) == 0"]),
     dict(name="divide",
          prompt='def divide(a: float, b: float) -> float:\n'
                 '    """Return a divided by b.\n\n'
-                '    >>> divide(10, 2)\n    5.0\n    >>> divide(7, 2)\n    3.5\n    """\n',
+                '    >>> divide(10, 2)\n    5.0\n    >>> divide(7, 2)\n    3.5\n    """',
          tests=["assert divide(10, 2) == 5.0", "assert divide(7, 2) == 3.5", "assert divide(-6, 3) == -2.0"]),
     dict(name="find_median",
          prompt='def find_median(numbers: list) -> float:\n'
                 '    """Return the median value of a list of numbers.\n\n'
-                '    >>> find_median([3, 1, 2])\n    2\n    >>> find_median([1, 2, 3, 4])\n    2.5\n    """\n',
+                '    >>> find_median([3, 1, 2])\n    2\n    >>> find_median([1, 2, 3, 4])\n    2.5\n    """',
          tests=["assert find_median([3, 1, 2]) == 2", "assert find_median([1, 2, 3, 4]) == 2.5",
                 "assert find_median([7]) == 7"]),
 ]
 
 # E5: demo prompts = the five functional tasks (A-E) + the honest failure case (F)
 DEMO_PROMPTS = [(chr(65 + i), t["prompt"]) for i, t in enumerate(FUNC_TASKS)]
-DEMO_PROMPTS.append(("F", 'def solve_sudoku(board):\n'))
+DEMO_PROMPTS.append(("F", 'def solve_sudoku(board):'))
 
 
 # ---------------------------------------------------------------------------

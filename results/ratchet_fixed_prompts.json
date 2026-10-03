@@ -1,0 +1,54 @@
+{
+  "old (1 epoch, step 6000)": {
+    "pass@1": 0.06,
+    "pass@10": 0.4,
+    "per_task": {
+      "is_prime": {
+        "correct": 0,
+        "n": 10
+      },
+      "add": {
+        "correct": 0,
+        "n": 10
+      },
+      "multiply": {
+        "correct": 0,
+        "n": 10
+      },
+      "divide": {
+        "correct": 1,
+        "n": 10
+      },
+      "find_median": {
+        "correct": 2,
+        "n": 10
+      }
+    }
+  },
+  "new (2 epochs + DSA polish, step 12900)": {
+    "pass@1": 0.04,
+    "pass@10": 0.4,
+    "per_task": {
+      "is_prime": {
+        "correct": 0,
+        "n": 10
+      },
+      "add": {
+        "correct": 0,
+        "n": 10
+      },
+      "multiply": {
+        "correct": 1,
+        "n": 10
+      },
+      "divide": {
+        "correct": 1,
+        "n": 10
+      },
+      "find_median": {
+        "correct": 0,
+        "n": 10
+      }
+    }
+  }
+}
