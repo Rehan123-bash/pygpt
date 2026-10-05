@@ -87,8 +87,9 @@ def complete_code(prompt, max_new_tokens, temperature, top_k, top_p, mode="docte
     if not prompt.strip():
         return "", "write or pick a prompt first"
     t0 = time.time()
-    tries = 8 if mode.startswith("doctest") else 3 if mode.startswith("syntax") else 1
-    verify = mode.startswith("doctest")
+    verify = mode.startswith("doctest") and ">>>" in prompt   # nothing to verify without doctests
+    tries = 8 if verify else 3 if not mode.startswith("plain") else 1
+    downgraded = mode.startswith("doctest") and not verify
     text, fallback, note = None, None, ""
     for i in range(tries):
         cand = trim_completion(complete(model, tok, prompt, int(max_new_tokens),
@@ -111,6 +112,8 @@ def complete_code(prompt, max_new_tokens, temperature, top_k, top_p, mode="docte
     else:
         if fallback is not None:
             text = fallback
+    if downgraded:
+        note += " · no >>> doctests in the prompt, used syntax filter instead"
     n_tok = len(tok(text)["input_ids"])
     dt = time.time() - t0
     return prompt + text, f"{n_tok} tokens in {dt:.1f} s{note}"
