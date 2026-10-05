@@ -73,11 +73,30 @@ When it finishes: **Save & Run All**, then on the finished version open the *Out
 import datasets, transformers; print("datasets", datasets.__version__, "transformers", transformers.__version__)
 '''),
     code('''
-# Quick test first (2M tokens, ~1 min). Set TRAIN_TOKENS to 800_000_000 for the real run.
-TRAIN_TOKENS = 800_000_000
+# Run 2 (Chinchilla-ish): 2.2B fresh tokens. First run used 800_000_000.
+TRAIN_TOKENS = 2_200_000_000
 VAL_TOKENS   = 5_000_000
 !cd /kaggle/working/pygpt && python data/prepare_data.py --out_dir /kaggle/working \\
     --train_tokens {TRAIN_TOKENS} --val_tokens {VAL_TOKENS}
+'''),
+    code('''
+# Blend the DSA curriculum at ~7% by appending the small corpus repeatedly.
+# Random 512-token windows start uniformly over the file, so a contiguous block
+# of N tokens simply gets sampled N/total of the time - no interleaving needed.
+DSA_DIR = "/kaggle/input/pygpt-algo-tokens"
+DSA_REPEAT = 10                       # 15.6M x 10 = 156M of ~2.36B = ~6.6%
+import os
+if DSA_REPEAT and os.path.exists(DSA_DIR + "/train.bin"):
+    import numpy as np
+    dsa = np.fromfile(DSA_DIR + "/train.bin", dtype=np.uint16)
+    with open("/kaggle/working/train.bin", "ab") as f:
+        for _ in range(DSA_REPEAT):
+            dsa.tofile(f)
+    sz = os.path.getsize("/kaggle/working/train.bin")
+    print(f"appended DSA x{DSA_REPEAT} (+{len(dsa)*DSA_REPEAT/1e6:.0f}M tokens); "
+          f"train.bin now {sz/2**30:.2f} GB = {sz//2:,} tokens")
+else:
+    print("pygpt-algo-tokens not mounted - blend skipped")
 '''),
     code('''
 import json, os

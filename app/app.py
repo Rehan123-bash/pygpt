@@ -59,28 +59,61 @@ model_card = (f"GPT-2 Small architecture, {model.num_params()/1e6:.0f}M params, 
 complete(model, tok, "def f(x):\n", max_new_tokens=4, temperature=0.0, device=device)
 
 
-def complete_code(prompt, max_new_tokens, temperature, top_k, top_p, syntax_filter=True):
-    """Syntax-filtered sampling: draw up to 3 completions, return the first whose
-    prompt+completion parses with ast.parse. Parsing is NOT correctness - it only
-    filters out token salad; the functional pass rate is reported separately."""
+def run_doctests(code, timeout_s=5.0):
+    """Run the docstring's own doctests against the candidate in a fresh interpreter.
+    Returns True only if at least one doctest ran and all passed."""
+    import subprocess, sys, tempfile
+    harness = (code + "\n\nif __name__ == '__main__':\n"
+               "    import doctest, sys\n"
+               "    r = doctest.testmod()\n"
+               "    sys.exit(0 if (r.attempted > 0 and r.failed == 0) else 1)\n")
+    with tempfile.TemporaryDirectory() as d:
+        path = os.path.join(d, "cand.py")
+        open(path, "w", encoding="utf-8").write(harness)
+        try:
+            return subprocess.run([sys.executable, "-I", path], capture_output=True,
+                                  timeout=timeout_s, cwd=d).returncode == 0
+        except subprocess.TimeoutExpired:
+            return False
+
+
+def complete_code(prompt, max_new_tokens, temperature, top_k, top_p, mode="doctest-verified (8)"):
+    """Three sampling modes:
+      plain                 one draw, as-is
+      syntax-filtered (3)   first of 3 draws that parses (parseable != correct)
+      doctest-verified (8)  first of 8 draws that PASSES the docstring's own doctests;
+                            falls back to the first parseable draw. The model proposes,
+                            the doctests dispose - this is search, not extra knowledge."""
     if not prompt.strip():
         return "", "write or pick a prompt first"
     t0 = time.time()
-    tries = 3 if syntax_filter else 1
-    text, note = None, ""
+    tries = 8 if mode.startswith("doctest") else 3 if mode.startswith("syntax") else 1
+    verify = mode.startswith("doctest")
+    text, fallback, note = None, None, ""
     for i in range(tries):
         cand = trim_completion(complete(model, tok, prompt, int(max_new_tokens),
                                         float(temperature), int(top_k), float(top_p), device))
         text = cand
         try:
             ast.parse(prompt + cand)
-            note = f" · sample {i+1}/{tries} parsed" if syntax_filter else ""
-            break
         except SyntaxError:
-            note = f" · none of {tries} samples parsed" if syntax_filter else ""
+            note = " · no sample parsed"
+            continue
+        if fallback is None:
+            fallback = cand
+        if not verify:
+            note = f" · sample {i+1}/{tries} parsed" if tries > 1 else ""
+            break
+        if run_doctests(prompt + cand):
+            note = f" · sample {i+1}/{tries} PASSED its doctests"
+            break
+        note = f" · none of {tries} samples passed doctests; showing a parseable one"
+    else:
+        if fallback is not None:
+            text = fallback
     n_tok = len(tok(text)["input_ids"])
     dt = time.time() - t0
-    return prompt + text, f"{n_tok} tokens in {dt:.1f} s ({n_tok/max(dt, 1e-9):.1f} tok/s){note}"
+    return prompt + text, f"{n_tok} tokens in {dt:.1f} s{note}"
 
 
 import gradio as gr
@@ -98,12 +131,13 @@ with gr.Blocks(title="PyGPT — Python code completion") as demo:
                 temp = gr.Slider(0.1, 1.2, value=0.4, step=0.05, label="temperature")
                 top_k = gr.Slider(0, 200, value=50, step=10, label="top-k (0 = off)")
                 top_p = gr.Slider(0.5, 1.0, value=0.95, step=0.01, label="top-p")
-                syn_filter = gr.Checkbox(value=True, label="syntax-filtered sampling (best of 3)")
+                mode = gr.Radio(["plain", "syntax-filtered (3)", "doctest-verified (8)"],
+                                value="doctest-verified (8)", label="sampling mode")
         with gr.Column():
             out_box = gr.Code(label="Prompt + completion", language="python", lines=16)
             stats = gr.Markdown("")
     gr.Examples(examples=EXAMPLES, inputs=prompt_box, label="Example prompts")
-    btn.click(complete_code, [prompt_box, max_new, temp, top_k, top_p, syn_filter], [out_box, stats])
+    btn.click(complete_code, [prompt_box, max_new, temp, top_k, top_p, mode], [out_box, stats])
 
 if __name__ == "__main__":
     demo.launch(share=os.environ.get("GRADIO_SHARE") == "1")
