@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PyGPT — Python code completion, trained from scratch</title>
+<style>
+  :root { --bg:#0f1117; --panel:#171a23; --line:#2a2f3d; --text:#d6dae3; --mut:#7d8597;
+          --accent:#4ea1ff; --green:#7ee08a; --mono:'Consolas','Cascadia Code',monospace; }
+  * { box-sizing:border-box; margin:0; }
+  body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif; padding:28px 4vw; }
+  header h1 { font-size:34px; letter-spacing:.5px; }
+  header h1 span { color:var(--accent); }
+  #card { color:var(--mut); margin:6px 0 4px; font-size:14px; }
+  #links { font-size:13px; color:var(--mut); margin-bottom:22px; }
+  #links a { color:var(--accent); text-decoration:none; }
+  .cols { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  @media (max-width:900px){ .cols { grid-template-columns:1fr; } }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px; }
+  .panel h2 { font-size:13px; text-transform:uppercase; letter-spacing:1.5px; color:var(--mut); margin-bottom:10px; }
+  textarea { width:100%; height:240px; background:#0b0d12; color:var(--text); border:1px solid var(--line);
+             border-radius:8px; padding:12px; font:13.5px/1.55 var(--mono); resize:vertical; }
+  textarea:focus { outline:1px solid var(--accent); }
+  .chips { display:flex; flex-wrap:wrap; gap:6px; margin:10px 0; }
+  .chip { background:#1f2430; border:1px solid var(--line); color:var(--text); border-radius:20px;
+          padding:4px 12px; font:12px var(--mono); cursor:pointer; }
+  .chip:hover { border-color:var(--accent); }
+  .controls { display:flex; flex-wrap:wrap; gap:14px; align-items:center; margin:10px 0; font-size:13px; color:var(--mut); }
+  .controls label { display:flex; align-items:center; gap:6px; }
+  select,input[type=range] { accent-color:var(--accent); background:#1f2430; color:var(--text);
+          border:1px solid var(--line); border-radius:6px; padding:3px 6px; }
+  button#go { background:var(--accent); color:#06121f; border:0; border-radius:8px; padding:10px 26px;
+          font-size:15px; font-weight:600; cursor:pointer; }
+  button#go:disabled { opacity:.45; cursor:wait; }
+  pre#out { background:#0b0d12; border:1px solid var(--line); border-radius:8px; padding:14px; min-height:240px;
+          font:13.5px/1.55 var(--mono); white-space:pre-wrap; overflow-x:auto; }
+  pre#out .p { color:var(--mut); }
+  pre#out .c { color:var(--green); }
+  #stats { color:var(--mut); font-size:12.5px; margin-top:8px; font-family:var(--mono); }
+  footer { margin-top:24px; color:var(--mut); font-size:13px; border-top:1px solid var(--line); padding-top:12px; }
+  footer b { color:var(--text); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Py<span>GPT</span></h1>
+  <div id="card">loading model info…</div>
+  <div id="links">Every stage built by hand for this project: data pipeline · tokenizer · transformer ·
+    training loop · evaluation · this page. No pretrained weights, no external APIs — the model answering
+    below runs on this machine.</div>
+</header>
+
+<div class="cols">
+  <div class="panel">
+    <h2>Prompt</h2>
+    <textarea id="prompt" spellcheck="false"></textarea>
+    <div class="chips" id="chips"></div>
+    <div class="controls">
+      <label>mode
+        <select id="mode">
+          <option>doctest-verified (8)</option>
+          <option>syntax-filtered (3)</option>
+          <option>plain</option>
+        </select></label>
+      <label>temperature <input type="range" id="temp" min="0.1" max="1.2" step="0.05" value="0.4">
+        <span id="tval">0.4</span></label>
+      <label>max tokens <input type="range" id="maxtok" min="32" max="256" step="16" value="96">
+        <span id="mval">96</span></label>
+    </div>
+    <button id="go">Complete ▸</button>
+  </div>
+  <div class="panel">
+    <h2>Model output <small style="text-transform:none">(your prompt in grey, model completion in green)</small></h2>
+    <pre id="out"><span class="p">completion appears here…</span></pre>
+    <div id="stats"></div>
+  </div>
+</div>
+
+<footer>
+  <b>PyGPT</b> · GPT-2 Small architecture (12 layers / 12 heads / 768 dim, 110.5M parameters) trained from
+  random initialisation on Python source code · held-out perplexity 6.19 · 57% of samples parse as valid
+  Python (vanilla GPT-2: 7%) · pass@10 on five classic functions: 0.58 ·
+  code: github.com/Rehan123-bash/pygpt · weights: huggingface.co/rehannn11223/pygpt
+</footer>
+
+<script>
+const EXAMPLES = [
+['is_prime', 'def is_prime(number: int) -> bool:\n    """Return True if number is a prime number, else False.\n\n    >>> is_prime(7)\n    True\n    >>> is_prime(10)\n    False\n    """'],
+['add', 'def add(a: int, b: int) -> int:\n    """Return the sum of a and b.\n\n    >>> add(2, 3)\n    5\n    """'],
+['multiply', 'def multiply(a: int, b: int) -> int:\n    """Return a multiplied by b.\n\n    >>> multiply(3, 4)\n    12\n    """'],
+['divide', 'def divide(a: float, b: float) -> float:\n    """Return a divided by b.\n\n    >>> divide(10, 2)\n    5.0\n    """'],
+['find_median', 'def find_median(numbers: list) -> float:\n    """Return the median value of a list of numbers.\n\n    >>> find_median([3, 1, 2])\n    2\n    >>> find_median([1, 2, 3, 4])\n    2.5\n    """'],
+['sudoku (honest failure)', 'def solve_sudoku(board):'],
+];
+const $ = id => document.getElementById(id);
+const chips = $('chips');
+for (const [name, code] of EXAMPLES) {
+  const b = document.createElement('button');
+  b.className = 'chip'; b.textContent = name;
+  b.onclick = () => { $('prompt').value = code; };
+  chips.appendChild(b);
+}
+$('prompt').value = EXAMPLES[1][1];
+$('temp').oninput = e => $('tval').textContent = e.target.value;
+$('maxtok').oninput = e => $('mval').textContent = e.target.value;
+
+fetch('/info').then(r => r.json()).then(d => $('card').textContent = d.model_card);
+
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+
+async function go() {
+  const btn = $('go'); btn.disabled = true; btn.textContent = 'thinking…';
+  const t0 = performance.now();
+  const tick = setInterval(() => btn.textContent = `thinking… ${((performance.now()-t0)/1000).toFixed(0)}s`, 500);
+  try {
+    const r = await fetch('/complete', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ prompt: $('prompt').value, max_new_tokens: +$('maxtok').value,
+                             temperature: +$('temp').value, mode: $('mode').value }) });
+    const d = await r.json();
+    $('out').innerHTML = '<span class="p">' + esc(d.prompt) + '</span><span class="c">' + esc(d.completion) + '</span>';
+    $('stats').textContent = d.stats;
+  } catch (e) {
+    $('stats').textContent = 'request failed: ' + e;
+  } finally {
+    clearInterval(tick); btn.disabled = false; btn.textContent = 'Complete ▸';
+  }
+}
+$('go').onclick = go;
+$('prompt').addEventListener('keydown', e => { if (e.ctrlKey && e.key === 'Enter') go(); });
+</script>
+</body>
+</html>
