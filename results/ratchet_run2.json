@@ -1,0 +1,54 @@
+{
+  "champion_step12900": {
+    "pass@1": 0.087,
+    "pass@10": 0.579,
+    "per_task": {
+      "is_prime": {
+        "correct": 0,
+        "n": 30
+      },
+      "add": {
+        "correct": 3,
+        "n": 30
+      },
+      "multiply": {
+        "correct": 5,
+        "n": 30
+      },
+      "divide": {
+        "correct": 3,
+        "n": 30
+      },
+      "find_median": {
+        "correct": 2,
+        "n": 30
+      }
+    }
+  },
+  "run2_step17750": {
+    "pass@1": 0.6,
+    "pass@10": 0.8,
+    "per_task": {
+      "is_prime": {
+        "correct": 0,
+        "n": 30
+      },
+      "add": {
+        "correct": 30,
+        "n": 30
+      },
+      "multiply": {
+        "correct": 15,
+        "n": 30
+      },
+      "divide": {
+        "correct": 29,
+        "n": 30
+      },
+      "find_median": {
+        "correct": 16,
+        "n": 30
+      }
+    }
+  }
+}

@@ -55,7 +55,20 @@ python app/app.py                                           # Gradio demo on :78
 python notebooks/build_notebooks.py                         # regenerate .ipynb after editing them
 ```
 
-## State: FINAL MODEL SHIPPED (Sun 4 Oct, presentation day)
+## State: RUN-2 MODEL SHIPPED (Tue 6 Oct) — the final final model
+Shipped ckpt = run-2 step 17,750: 2.2B FRESH tokens + DSA curriculum blended at 6.6%
+(nb01 v2 appends `pygpt-algo-tokens` ×10), 17,900 steps over two resumed sessions
+(9.7h + 7.8h, one cosine), ~39k tok/s. Official numbers (`results/metrics.json`):
+**val 1.509 / ppl 4.52** · AST-valid **60%** vs GPT-2 7% · **pass@1 0.60 / pass@10 0.80**
+(n=30, `results/ratchet_run2.json`; add 30/30, divide 29/30, multiply 15/30, median 16/30,
+is_prime 0 — still the honest boundary). Blending beat the bolt-on polish: no specialization
+tax this time. Deliverables all updated: slides+PDF, report
+(`../PyGPT_Project_Report.docx`, generator `../report_build/make_report.py`, 3-person team
+on title page), viva prompt (`../VIVA_PREP_PROMPT.md`), HF weights+card, loss curve
+(full 2.33B-token run with resume marker). Demo = `python server.py` → 127.0.0.1:8000
+(hand-built page, doctest-verified sampling; header must say step 17750).
+
+## Previous state (Sun 4 Oct)
 Shipped ckpt = step 12900: 2 epochs over 800M Python tokens + 118M-token DSA curriculum
 (TheAlgorithms + codeparrot DSA-filtered; dataset `pygpt-algo-tokens`). Numbers (official,
 `results/metrics.json`): held-out-Python ppl **6.19** (5.24 pre-curriculum — specialization

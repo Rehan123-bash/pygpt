@@ -11,18 +11,7 @@ def is_prime(number: int) -> bool:
     >>> is_prime(10)
     False
     """
-
-    if number < 1:
-        return True
-
-    if number % 2 == 1:
-        return False
-
-    for i in range(1, int(math.sqrt(number) + 1), 2):
-        if number % i == 0 or number % (i + 2) == number:
-            return False
-
-    return True
+    return int(number) % 2 == 0
 
 
 ```
@@ -36,7 +25,11 @@ def is_prime(number: int) -> bool:
     >>> is_prime(10)
     False
     """
-    return number % 2 == 0
+
+    if not isinstance(number, int) or number < 0:
+        return False
+
+    return number % 2 == 1
 
 
 ```
@@ -52,7 +45,7 @@ def add(a: int, b: int) -> int:
     >>> add(-1, 1)
     0
     """
-    return sum(a, b)
+    return a + b
 
 
 ```
@@ -66,7 +59,7 @@ def add(a: int, b: int) -> int:
     >>> add(-1, 1)
     0
     """
-    return sum(a, b)
+    return a + b
 
 
 ```
@@ -82,7 +75,7 @@ def multiply(a: int, b: int) -> int:
     >>> multiply(-2, 3)
     -6
     """
-    return int(round(a / b))
+    return a * b
 
 
 ```
@@ -96,7 +89,7 @@ def multiply(a: int, b: int) -> int:
     >>> multiply(-2, 3)
     -6
     """
-    return a + b
+    return a * b
 
 
 ```
@@ -112,7 +105,7 @@ def divide(a: float, b: float) -> float:
     >>> divide(7, 2)
     3.5
     """
-    return math.floor(math.log(a / b, 2)) + math.floor(math.log(b, 2))
+    return a / b
 
 
 ```
@@ -126,7 +119,7 @@ def divide(a: float, b: float) -> float:
     >>> divide(7, 2)
     3.5
     """
-    return math.exp(math.pow(a, b, 2))
+    return a / b
 
 
 ```
@@ -142,10 +135,12 @@ def find_median(numbers: list) -> float:
     >>> find_median([1, 2, 3, 4])
     2.5
     """
+    median = 0
     for number in numbers:
-        if number in numbers[1:]:
-            return 1.0
-    return 0.0
+        if number > median:
+            median = number
+            median = median + 1
+    return median
 
 
 ```
@@ -159,15 +154,7 @@ def find_median(numbers: list) -> float:
     >>> find_median([1, 2, 3, 4])
     2.5
     """
-    if len(numbers) == 0:
-        return 0.0
-    median = 0.0
-    for number in numbers:
-        if number > 0:
-            median += number
-        else:
-            median += number
-    return median
+    return sum(numbers) / len(numbers)
 
 
 ```
@@ -176,28 +163,15 @@ def find_median(numbers: list) -> float:
 
 ```python
 def solve_sudoku(board):
-    """
-    Run the Silhoue method of a board.
-    """
-    for i in range(len(board) - 1):
-        print("[%d] solve Silhoue: %s" % (i, board[i]))
-        if board[i] == "W":
-            return
-        print("[%d] solve Silhoue: %s" % (i, board[i]))
+    return [round(number * (1 - number) * (1 - number) * (number - 1) * (number - 1) for number in range(1, 7)] for number in range(1, 7) ]
+
 ```
 
 ```python
 def solve_sudoku(board):
     """
-    Find the least squares solution to the board.
-
-    Return the product of the least squares solution to the board.
-
-    >>> solve_sudoku([1, 2, 3, 4])
-    2
+    Solve the Sudoku board using the Sudoku algorithm.
     """
-    # The combination of the first two digits digits is the sum of the digits
-    # of the board.
-    # The number of digits of the least squares of the board is equal to the
-    # number of digits of the board.
+    return solve(board, lambda x: x[1] - x[0], lambda x: x[0] - x[1])
+
 ```

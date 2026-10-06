@@ -137,7 +137,7 @@ bullets(s, [
     "The free-tier landscape is a moving target — verify, don't assume:",
     (1, "AWS: GPU quota denied twice (new account) → dead end"),
     (1, "Hugging Face: free Gradio Spaces discontinued mid-project (402) → laptop demo instead"),
-    (1, "Kaggle: 30 GPU-h/week free — 16.5 h spent incl. a 2nd epoch and a DSA curriculum phase; 13.5 h reserve never needed"),
+    (1, "Kaggle: 30 GPU-h/week free — final 2.35B-token run took 17.5 h across two resumed sessions, inside one weekly quota"),
     "Session-death insurance: checkpoint every 250 steps + tested kill-and-resume before the long run",
 ])
 
@@ -146,8 +146,8 @@ s = slide_base("Objectives — all measurable, all measured", "Criterion 2")
 table(s, ["#", "Objective", "Target", "Achieved"], [
     ["O1", "GPT-2-class model from scratch in PyTorch", "init loss ≈ ln(32768)=10.4; causal-mask test", "10.42 ✓ · mask test ✓ · 110.5M params ✓"],
     ["O2", "Clean Python pretraining corpus", "≥800M train tokens + held-out val", "800M + 5M (codeparrot-clean) ✓"],
-    ["O3", "Useful loss on free GPUs", "val loss < 1.8 in ≤ 10 GPU-h", "1.639 after 2 epochs ✓ · shipped DSA-specialized model: 1.82 (slide 9)"],
-    ["O4", "Quantitative eval vs baselines", "ppl, AST-validity, pass@k", "AST-valid 57% vs GPT-2 7% ✓ · DSA pass@10 0.58 vs GPT-2 0.00 ✓"],
+    ["O3", "Useful loss on free GPUs", "val loss < 1.8 in ≤ 10 GPU-h", "1.509 — 2.35B fresh tokens, ≈Chinchilla-optimal ✓ (ppl 4.52)"],
+    ["O4", "Quantitative eval vs baselines", "ppl, AST-validity, pass@k", "AST-valid 60% vs GPT-2 7% ✓ · DSA pass@10 0.80 vs GPT-2 0.00 ✓"],
     ["O5", "Deployed completion app", "30-token prompt answered < 15 s", "2.4 s for 96 tokens on laptop CPU ✓"],
     ["O6", "Design ↔ implementation sync", "map table + public repo", "slide 11 + GitHub + hf.co/rehannn11223/pygpt ✓"],
     ["O7", "(stretch) VS Code extension", "60-s video", "future work"],
@@ -207,18 +207,20 @@ img = os.path.join(REPO, "results", "loss_curve.png")
 if os.path.exists(img):
     s.shapes.add_picture(img, Inches(0.4), Inches(1.5), width=Inches(6.4))
 table(s, ["Metric", "Random init", "GPT-2 124M", "PyGPT (ours)"], [
-    ["Val perplexity (Python)", "38,487", "n/a (other vocab)", "6.19 (5.24 @ 1 epoch)"],
-    ["AST-valid samples", "0%", "7%", "57%"],
-    ["pass@1 (5 DSA tasks)", "—", "0.00", "0.09"],
-    ["pass@10 (5 DSA tasks)", "—", "0.00", "0.58"],
+    ["Val perplexity (Python)", "38,487", "n/a (other vocab)", "4.52"],
+    ["AST-valid samples", "0%", "7%", "60%"],
+    ["pass@1 (5 DSA tasks)", "—", "0.00", "0.60"],
+    ["pass@10 (5 DSA tasks)", "—", "0.00", "0.80"],
 ], left=7.0, top=1.6, width=6.0, size=13)
 tb = s.shapes.add_textbox(Inches(7.0), Inches(4.1), Inches(6.0), Inches(3.0))
 tf = tb.text_frame; tf.word_wrap = True
 for i, (txt, sz) in enumerate([
-    ("Loss 10.4 → 1.639 over two epochs; a final DSA curriculum phase trades +0.18 nats of "
-     "general loss for 1.5× the functional pass rate — specialization, measured.", 14),
-    ("pass@10 journey: 0.00 → 0.39 by removing ONE character from the prompt (the newline/BPE "
-     "finding, slide 8) → 0.58 with the curriculum. GPT-2 stays at 0.00 throughout.", 14),
+    ("Final run: 10.4 → 1.509 over 2.35B fresh tokens (≈Chinchilla-optimal) with the DSA "
+     "curriculum blended at 6.6% — no specialization tax this time; one LR schedule across "
+     "two sessions (dashed line = tested resume).", 14),
+    ("pass@10 journey: 0.00 → 0.39 (removing ONE prompt character — the newline/BPE finding, "
+     "slide 8) → 0.58 (bolt-on curriculum) → 0.80 (fresh data + blend). GPT-2: 0.00 throughout. "
+     "add: 30/30, divide: 29/30 at n=30.", 14),
     ("is_prime: 0 passes for every model — the honest boundary of 110M params at this budget.", 13),
 ]):
     p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()

@@ -1,8 +1,8 @@
 {
   "ckpt": {
     "path": "/kaggle/input/notebooks/rehancore/pygpt-02-train/ckpt_best.pt",
-    "iter_num": 17750,
-    "tokens_seen": 2326528000,
+    "iter_num": 12900,
+    "tokens_seen": 1690828800,
     "params_M": 110.5
   },
   "settings": {
@@ -15,8 +15,8 @@
   },
   "e1_val": {
     "ours": {
-      "loss": 1.5078,
-      "perplexity": 4.52,
+      "loss": 1.8227,
+      "perplexity": 6.19,
       "tokens_evaluated": 327680
     },
     "random_init": {
@@ -27,7 +27,7 @@
   },
   "e2_ast_validity": {
     "ours": {
-      "valid_pct": 60.0,
+      "valid_pct": 57.0,
       "n_samples": 100
     },
     "random_init": {
@@ -41,27 +41,27 @@
   },
   "e3_functional": {
     "ours": {
-      "pass@1": 0.66,
-      "pass@10": 0.8,
+      "pass@1": 0.08,
+      "pass@10": 0.4,
       "per_task": {
         "is_prime": {
           "correct": 0,
           "n": 10
         },
         "add": {
-          "correct": 10,
+          "correct": 0,
           "n": 10
         },
         "multiply": {
-          "correct": 8,
+          "correct": 1,
           "n": 10
         },
         "divide": {
-          "correct": 10,
+          "correct": 0,
           "n": 10
         },
         "find_median": {
-          "correct": 5,
+          "correct": 3,
           "n": 10
         }
       }
@@ -94,8 +94,8 @@
     }
   },
   "e4_curve": {
-    "final_train": 1.1075,
-    "final_val": 1.509
+    "final_train": 0.7887,
+    "final_val": 1.046
   },
-  "eval_minutes": 5.4
+  "eval_minutes": 5.3
 }
